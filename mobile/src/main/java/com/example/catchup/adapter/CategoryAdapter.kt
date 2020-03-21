@@ -1,5 +1,7 @@
 package com.example.catchup.adapter
 
+import android.content.Context
+import android.provider.Telephony.Mms.Part.FILENAME
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -7,14 +9,70 @@ import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import com.example.catchup.R
 import kotlinx.android.synthetic.main.main_row_item.view.*
+import java.io.File
+import java.io.FileInputStream
+import java.io.FileOutputStream
+import java.lang.Exception
 
-class CategoryAdapter : RecyclerView.Adapter<CategoryAdapter.ViewHolder>() {
+class CategoryAdapter(val context: Context) : RecyclerView.Adapter<CategoryAdapter.ViewHolder>() {
 
-    private var categories = listOf<String>()
+    data class Category(
+        val name: String,
+        var selected: Boolean = false
+    )
+
+    private val categories = mutableListOf<Category>()
+    private val FILENAME = "selected.txt"
 
     fun addList(list: List<String>) {
-        categories = list.sortedWith(String.CASE_INSENSITIVE_ORDER)
+        val selected = mutableListOf<String>()
+        try {
+            val input: FileInputStream = context.openFileInput(FILENAME)
+            selected.addAll(0, input.readBytes().toString(Charsets.UTF_8).split(", "))
+            input.close()
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
+        if (selected.size != 0) {
+            var i = 0
+            list.sortedWith(String.CASE_INSENSITIVE_ORDER).forEach { string ->
+                if (i < selected.size && selected[i] == string) {
+                    i++
+                    categories.add(Category(string, true))
+                } else {
+                    categories.add(Category(string))
+                }
+            }
+        } else {
+            list.sortedWith(String.CASE_INSENSITIVE_ORDER).forEach { string ->
+                categories.add(Category(string))
+            }
+        }
         notifyItemRangeChanged(0, categories.size)
+    }
+
+    private fun getSelectedCount(): Int {
+        var count = 0
+        categories.forEach { category ->
+            if (category.selected) count++
+        }
+        return count
+    }
+
+    private fun getSelectedItems(): String {
+        var str = ""
+        var first = true
+        categories.forEach {
+            if (it.selected) {
+                if (first) {
+                    str += it.name
+                    first = false
+                } else {
+                    str += ", ${it.name}"
+                }
+            }
+        }
+        return str
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
@@ -28,11 +86,20 @@ class CategoryAdapter : RecyclerView.Adapter<CategoryAdapter.ViewHolder>() {
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
         val category = categories[position]
         holder.category = category
-        holder.tvTitle.text = category
+        holder.tvTitle.text = category.name
+        holder.tvTitle.isSelected = category.selected
+        holder.tvTitle.setOnClickListener { view ->
+            view.isSelected = !view.isSelected
+            category.selected = !category.selected
+            val content = getSelectedItems()
+            val out: FileOutputStream = context.openFileOutput(FILENAME, Context.MODE_PRIVATE)
+            out.write(content.toByteArray())
+            out.close()
+        }
     }
 
     class ViewHolder(view: View) : RecyclerView.ViewHolder(view) {
-        var category: String? = null
+        var category: Category? = null
         val tvTitle: TextView = view.tvTitle
     }
 }

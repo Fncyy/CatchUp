@@ -20,7 +20,7 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
-        categoryAdapter = CategoryAdapter()
+        categoryAdapter = CategoryAdapter(this)
         newsAdapter = NewsAdapter()
         rvMain.adapter = categoryAdapter
         layoutManager = LinearLayoutManager(this)

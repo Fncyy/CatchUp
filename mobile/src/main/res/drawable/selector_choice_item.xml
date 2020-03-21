@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<selector xmlns:android="http://schemas.android.com/apk/res/android" android:enterFadeDuration="100" android:exitFadeDuration="100">
+    <item android:drawable="@color/choiceItemPressedBackground" android:state_pressed="true" />
+    <item android:drawable="@color/choiceItemActiveBackground" android:state_selected="true" />
+    <item android:drawable="@color/choiceItemBackground" />
+</selector>
