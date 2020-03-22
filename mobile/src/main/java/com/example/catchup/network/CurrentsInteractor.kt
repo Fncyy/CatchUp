@@ -1,14 +1,14 @@
-package com.example.catchup
+package com.example.catchup.network
 
 import android.os.Handler
 import com.example.catchup.model.CategoryResponse
 import com.example.catchup.model.NewsResponse
-import com.example.catchup.network.CurrentsAPI
 import retrofit2.Call
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 
 class CurrentsInteractor {
+
     private val currentsApi: CurrentsAPI
 
     init {
@@ -52,5 +52,14 @@ class CurrentsInteractor {
     ) {
         val getCategoriesRequest = currentsApi.getAvailableCategories()
         runCallOnBackgroundThread(getCategoriesRequest, onSuccess, onError)
+    }
+
+    fun getCategory(
+        onSuccess: (NewsResponse) -> Unit,
+        onError: (Throwable) -> Unit,
+        category: String
+    ) {
+        val getNewsRequest = currentsApi.getCategory(category)
+        runCallOnBackgroundThread(getNewsRequest, onSuccess, onError)
     }
 }

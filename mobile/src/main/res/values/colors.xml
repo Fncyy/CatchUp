@@ -3,15 +3,15 @@
     <color name="colorPrimary">#6200EE</color>
     <color name="colorPrimaryDark">#3700B3</color>
     <color name="colorAccent">#03DAC5</color>
-    <color name="primary">#4CAF50</color>
-    <color name="primary_dark">#388E3C</color>
-    <color name="primary_light">#C8E6C9</color>
-    <color name="accent">#8BC34A</color>
+    <color name="primary">#673AB7</color>
+    <color name="primary_dark">#512DA8</color>
+    <color name="primary_light">#D1C4E9</color>
+    <color name="accent">#03A9F4</color>
     <color name="primary_text">#212121</color>
     <color name="secondary_text">#757575</color>
     <color name="icons">#FFFFFF</color>
     <color name="divider">#BDBDBD</color>
     <color name="choiceItemBackground">#DFDFDF</color>
-    <color name="choiceItemActiveBackground">#FF45FB95</color>
-    <color name="choiceItemPressedBackground">#FF3BC769</color>
+    <color name="choiceItemActiveBackground">#B295FF</color>
+    <color name="choiceItemPressedBackground">#8B74C3</color>
 </resources>

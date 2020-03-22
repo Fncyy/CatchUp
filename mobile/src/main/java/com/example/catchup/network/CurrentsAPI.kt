@@ -23,4 +23,10 @@ interface CurrentsAPI {
 
     @GET(CATEGORY_URL)
     fun getAvailableCategories(): Call<CategoryResponse>
+
+    @GET(SEARCH_URL)
+    fun getCategory(
+        @Query("category") category: String,
+        @Query("apiKey") apiKey: String = API_KEY
+    ): Call<NewsResponse>
 }
