@@ -23,6 +23,8 @@ class CategoryAdapter(val context: Context) : RecyclerView.Adapter<CategoryAdapt
 
     private val categories = mutableListOf<Category>()
     private val FILENAME = "selected.txt"
+    private var selectedCount = 0
+    private val MAX_SELECTED_COUNT = 4
 
     fun addList(list: List<String>) {
         val selected = mutableListOf<String>()
@@ -89,12 +91,26 @@ class CategoryAdapter(val context: Context) : RecyclerView.Adapter<CategoryAdapt
         holder.tvTitle.text = category.name
         holder.tvTitle.isSelected = category.selected
         holder.tvTitle.setOnClickListener { view ->
-            view.isSelected = !view.isSelected
-            category.selected = !category.selected
-            val content = getSelectedItems()
-            val out: FileOutputStream = context.openFileOutput(FILENAME, Context.MODE_PRIVATE)
-            out.write(content.toByteArray())
-            out.close()
+            var selectionChanged = false
+
+            if (view.isSelected) {
+                selectionChanged = true
+                selectedCount--
+            } else {
+                if (selectedCount < MAX_SELECTED_COUNT) {
+                    selectionChanged = true
+                    selectedCount++
+                }
+            }
+
+            if (selectionChanged) {
+                view.isSelected = !view.isSelected
+                category.selected = !category.selected
+                val content = getSelectedItems()
+                val out: FileOutputStream = context.openFileOutput(FILENAME, Context.MODE_PRIVATE)
+                out.write(content.toByteArray())
+                out.close()
+            }
         }
     }
 
