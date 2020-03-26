@@ -1,7 +1,6 @@
 package com.example.catchup.adapter
 
 import android.content.Context
-import android.provider.Telephony.Mms.Part.FILENAME
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -9,7 +8,6 @@ import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import com.example.catchup.R
 import kotlinx.android.synthetic.main.main_row_item.view.*
-import java.io.File
 import java.io.FileInputStream
 import java.io.FileOutputStream
 import java.lang.Exception
@@ -61,7 +59,16 @@ class CategoryAdapter(val context: Context) : RecyclerView.Adapter<CategoryAdapt
         return count
     }
 
-    private fun getSelectedItems(): String {
+    fun getSelectedItems(): List<String> {
+        val list = mutableListOf<String>()
+        categories.forEach {
+            if (it.selected)
+                list.add(it.name)
+        }
+        return list
+    }
+
+    private fun getSelectedItemsForStorage(): String {
         var str = ""
         var first = true
         categories.forEach {
@@ -106,7 +113,7 @@ class CategoryAdapter(val context: Context) : RecyclerView.Adapter<CategoryAdapt
             if (selectionChanged) {
                 view.isSelected = !view.isSelected
                 category.selected = !category.selected
-                val content = getSelectedItems()
+                val content = getSelectedItemsForStorage()
                 val out: FileOutputStream = context.openFileOutput(FILENAME, Context.MODE_PRIVATE)
                 out.write(content.toByteArray())
                 out.close()

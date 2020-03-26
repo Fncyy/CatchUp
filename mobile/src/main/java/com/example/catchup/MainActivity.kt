@@ -21,6 +21,11 @@ class MainActivity : AppCompatActivity() {
     private lateinit var newsAdapter: NewsAdapter
     private lateinit var layoutManager: LinearLayoutManager
     private val currentsInteractor = CurrentsInteractor()
+    private val SAVED_NEWS_COUNT = 3
+
+    private lateinit var tts: TextToSpeech
+    private lateinit var file: File
+    private lateinit var filePath: String
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -32,33 +37,45 @@ class MainActivity : AppCompatActivity() {
         layoutManager = LinearLayoutManager(this)
         rvMain.layoutManager = layoutManager
         getAvailableCategories()
+        //getLatestNews()
 
-        testTTS()
+        filePath = applicationContext.filesDir.path
+
+        //testTTS()
     }
-
-    private lateinit var tts: TextToSpeech
-    private lateinit var file: File
 
     companion object {
         val TTS_TEST = "ttsTest"
     }
 
     private fun testTTS() {
-        val filePath = applicationContext.filesDir.path + "/hello.wav"
+        //val filePath = applicationContext.filesDir.path + "/hello.wav"
         file = File(filePath)
         tts = TextToSpeech(this, TextToSpeech.OnInitListener { status ->
             if (status != TextToSpeech.ERROR) {
                 tts.language = Locale.UK
+
+                categoryAdapter.getSelectedItems().forEach {
+                    currentsInteractor.getCategory(
+                        onSuccessWithString = this::saveNewsByCategory,
+                        onError = this::showError,
+                        category = it
+                    )
+                }
             }
         })
+    }
 
-        val result = when(tts.synthesizeToFile("A short sentece for testing", null, file, null)) {
-            TextToSpeech.ERROR -> "error"
-            TextToSpeech.SUCCESS -> "success"
-            else -> "neither somehow"
+    private fun saveNewsByCategory(response: NewsResponse, category: String) {
+        for (i in 0 until SAVED_NEWS_COUNT) {
+            file = File("$filePath/${category}_$i.wav")
+            tts.synthesizeToFile(response.news[i].description, null, file, null)
         }
-        Log.d(TTS_TEST, "synthesizeToFile queue result: ${result}")
+    }
+
+    override fun onStop() {
         tts.shutdown()
+        super.onStop()
     }
 
     private fun getLatestNews() {
@@ -66,6 +83,7 @@ class MainActivity : AppCompatActivity() {
             onSuccess = this::showNews,
             onError = this::showError
         )
+
     }
 
     private fun getAvailableCategories() {
@@ -77,7 +95,6 @@ class MainActivity : AppCompatActivity() {
 
     private fun showCategories(response: CategoryResponse) {
         categoryAdapter.addList(response.categories)
-
     }
 
     private fun showNews(response: NewsResponse) {

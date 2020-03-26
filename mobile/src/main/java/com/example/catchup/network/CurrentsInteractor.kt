@@ -22,14 +22,40 @@ class CurrentsInteractor {
 
     private fun <T> runCallOnBackgroundThread(
         call: Call<T>,
-        onSuccess: (T) -> Unit,
-        onError: (Throwable) -> Unit
+        onSuccess: ((T) -> Unit)?,
+        onSuccessWithString: ((T, String) -> Unit)?,
+        onError: (Throwable) -> Unit,
+        string: String = ""
     ) {
         val handler = Handler()
         Thread {
             try {
                 val response = call.execute().body()!!
-                handler.post { onSuccess(response) }
+                handler.post {
+                    if (onSuccess != null)
+                        onSuccess(response)
+                    if (onSuccessWithString != null)
+                        onSuccessWithString(response, string)
+                }
+
+            } catch (e: Exception) {
+                e.printStackTrace()
+                handler.post { onError(e) }
+            }
+        }.start()
+    }
+
+    private fun <T> runCallOnBackgroundThreadWithString(
+        call: Call<T>,
+        onSuccess: (T, String) -> Unit,
+        onError: (Throwable) -> Unit,
+        string: String
+    ) {
+        val handler = Handler()
+        Thread {
+            try {
+                val response = call.execute().body()!!
+                handler.post { onSuccess(response, string) }
 
             } catch (e: Exception) {
                 e.printStackTrace()
@@ -43,7 +69,7 @@ class CurrentsInteractor {
         onError: (Throwable) -> Unit
     ) {
         val getNewsRequest = currentsApi.getLatestNews()
-        runCallOnBackgroundThread(getNewsRequest, onSuccess, onError)
+        runCallOnBackgroundThread(getNewsRequest, onSuccess, null, onError)
     }
 
     fun getAvailableCategories(
@@ -51,15 +77,15 @@ class CurrentsInteractor {
         onError: (Throwable) -> Unit
     ) {
         val getCategoriesRequest = currentsApi.getAvailableCategories()
-        runCallOnBackgroundThread(getCategoriesRequest, onSuccess, onError)
+        runCallOnBackgroundThread(getCategoriesRequest, onSuccess, null, onError)
     }
 
     fun getCategory(
-        onSuccess: (NewsResponse) -> Unit,
+        onSuccessWithString: (NewsResponse, String) -> Unit,
         onError: (Throwable) -> Unit,
         category: String
     ) {
         val getNewsRequest = currentsApi.getCategory(category)
-        runCallOnBackgroundThread(getNewsRequest, onSuccess, onError)
+        runCallOnBackgroundThreadWithString(getNewsRequest, onSuccessWithString, onError, category)
     }
 }
