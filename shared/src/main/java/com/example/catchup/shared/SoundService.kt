@@ -1,11 +1,11 @@
 package com.example.catchup.shared
 
 import android.os.Bundle
+import android.provider.MediaStore
 import android.support.v4.media.MediaBrowserCompat.MediaItem
 import androidx.media.MediaBrowserServiceCompat
 import android.support.v4.media.session.MediaSessionCompat
-
-import java.util.ArrayList
+import java.util.*
 
 /**
  * This class provides a MediaBrowser through a service. It exposes the media library to a browsing
@@ -54,9 +54,15 @@ import java.util.ArrayList
  * &lt;/automotiveApp&gt;
  *
  */
-class MyMusicService : MediaBrowserServiceCompat() {
+class SoundService : MediaBrowserServiceCompat() {
 
     private lateinit var session: MediaSessionCompat
+
+    private var soundTree: Map<String, MediaItem> = mutableMapOf()
+
+    companion object {
+        val MEDIA_ROOT_ID = "/"
+    }
 
     private val callback = object : MediaSessionCompat.Callback() {
         override fun onPlay() {}
@@ -83,7 +89,7 @@ class MyMusicService : MediaBrowserServiceCompat() {
     override fun onCreate() {
         super.onCreate()
 
-        session = MediaSessionCompat(this, "MyMusicService")
+        session = MediaSessionCompat(this, "SoundService")
         sessionToken = session.sessionToken
         session.setCallback(callback)
         session.setFlags(MediaSessionCompat.FLAG_HANDLES_MEDIA_BUTTONS or
@@ -97,10 +103,13 @@ class MyMusicService : MediaBrowserServiceCompat() {
     override fun onGetRoot(clientPackageName: String,
                            clientUid: Int,
                            rootHints: Bundle?): MediaBrowserServiceCompat.BrowserRoot? {
-        return MediaBrowserServiceCompat.BrowserRoot("root", null)
+        return MediaBrowserServiceCompat.BrowserRoot(MEDIA_ROOT_ID, null)
     }
 
     override fun onLoadChildren(parentId: String, result: Result<MutableList<MediaItem>>) {
+        if (parentId == MEDIA_ROOT_ID) {
+
+        }
         result.sendResult(ArrayList())
     }
 }

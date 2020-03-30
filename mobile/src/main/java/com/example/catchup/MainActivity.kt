@@ -1,15 +1,22 @@
 package com.example.catchup
 
+import android.app.ActionBar
 import android.os.Bundle
 import android.speech.tts.TextToSpeech
 import android.util.Log
+import android.view.Menu
+import android.view.MenuItem
+import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
+import androidx.appcompat.widget.Toolbar
+import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.catchup.adapter.CategoryAdapter
 import com.example.catchup.adapter.NewsAdapter
 import com.example.catchup.model.CategoryResponse
 import com.example.catchup.model.NewsResponse
 import com.example.catchup.network.CurrentsInteractor
+import com.example.catchup.network.isConnected
 import kotlinx.android.synthetic.main.activity_main.*
 import okhttp3.internal.lockAndWaitNanos
 import java.io.File
@@ -44,8 +51,16 @@ class MainActivity : AppCompatActivity() {
         //testTTS()
     }
 
-    companion object {
-        val TTS_TEST = "ttsTest"
+    override fun onCreateOptionsMenu(menu: Menu?): Boolean {
+        menuInflater.inflate(R.menu.menu_main, menu)
+        return true
+    }
+
+    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+        when (item.itemId) {
+            R.id.menuReload -> getAvailableCategories()
+        }
+        return super.onOptionsItemSelected(item)
     }
 
     private fun testTTS() {
@@ -74,7 +89,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     override fun onStop() {
-        tts.shutdown()
+        //tts.shutdown()
         super.onStop()
     }
 
