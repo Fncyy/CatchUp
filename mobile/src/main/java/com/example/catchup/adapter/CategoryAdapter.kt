@@ -7,6 +7,7 @@ import android.view.ViewGroup
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import com.example.catchup.R
+import com.example.catchup.shared.library.LibraryCreator.Companion.SELECTED_SAVE_FILE
 import kotlinx.android.synthetic.main.main_row_item.view.*
 import java.io.FileInputStream
 import java.io.FileOutputStream
@@ -20,14 +21,13 @@ class CategoryAdapter(val context: Context) : RecyclerView.Adapter<CategoryAdapt
     )
 
     private val categories = mutableListOf<Category>()
-    private val FILENAME = "selected.txt"
     private var selectedCount = 0
     private val MAX_SELECTED_COUNT = 4
 
     fun addList(list: List<String>) {
         val selected = mutableListOf<String>()
         try {
-            val input: FileInputStream = context.openFileInput(FILENAME)
+            val input: FileInputStream = context.openFileInput(SELECTED_SAVE_FILE)
             selected.addAll(0, input.readBytes().toString(Charsets.UTF_8).split(", "))
             input.close()
         } catch (e: Exception) {
@@ -114,7 +114,7 @@ class CategoryAdapter(val context: Context) : RecyclerView.Adapter<CategoryAdapt
                 view.isSelected = !view.isSelected
                 category.selected = !category.selected
                 val content = getSelectedItemsForStorage()
-                val out: FileOutputStream = context.openFileOutput(FILENAME, Context.MODE_PRIVATE)
+                val out: FileOutputStream = context.openFileOutput(SELECTED_SAVE_FILE, Context.MODE_PRIVATE)
                 out.write(content.toByteArray())
                 out.close()
             }

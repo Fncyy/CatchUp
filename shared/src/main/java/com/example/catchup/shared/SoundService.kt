@@ -1,11 +1,22 @@
 package com.example.catchup.shared
 
+import android.media.MediaPlayer
 import android.os.Bundle
-import android.provider.MediaStore
 import android.support.v4.media.MediaBrowserCompat.MediaItem
-import androidx.media.MediaBrowserServiceCompat
+import android.support.v4.media.MediaDescriptionCompat
+import android.support.v4.media.MediaMetadataCompat
 import android.support.v4.media.session.MediaSessionCompat
-import java.util.*
+import android.support.v4.media.session.MediaSessionCompat.QueueItem
+import android.support.v4.media.session.PlaybackStateCompat
+import android.util.Log
+import androidx.media.MediaBrowserServiceCompat
+import com.example.catchup.shared.extensions.album
+import com.example.catchup.shared.extensions.flag
+import com.example.catchup.shared.extensions.id
+import com.example.catchup.shared.extensions.title
+import com.example.catchup.shared.library.BrowseTree
+import com.example.catchup.shared.library.MEDIA_ROOT_ID
+import java.io.File
 
 /**
  * This class provides a MediaBrowser through a service. It exposes the media library to a browsing
@@ -57,59 +68,227 @@ import java.util.*
 class SoundService : MediaBrowserServiceCompat() {
 
     private lateinit var session: MediaSessionCompat
+    private lateinit var playbackState: PlaybackStateCompat
+    private lateinit var browseTree: BrowseTree
 
-    private var soundTree: Map<String, MediaItem> = mutableMapOf()
-
-    companion object {
-        val MEDIA_ROOT_ID = "/"
-    }
-
-    private val callback = object : MediaSessionCompat.Callback() {
-        override fun onPlay() {}
-
-        override fun onSkipToQueueItem(queueId: Long) {}
-
-        override fun onSeekTo(position: Long) {}
-
-        override fun onPlayFromMediaId(mediaId: String?, extras: Bundle?) {}
-
-        override fun onPause() {}
-
-        override fun onStop() {}
-
-        override fun onSkipToNext() {}
-
-        override fun onSkipToPrevious() {}
-
-        override fun onCustomAction(action: String?, extras: Bundle?) {}
-
-        override fun onPlayFromSearch(query: String?, extras: Bundle?) {}
-    }
+    private val callback = SoundCallback()
+    private var state: Int = PlaybackStateCompat.STATE_STOPPED
 
     override fun onCreate() {
         super.onCreate()
 
-        session = MediaSessionCompat(this, "SoundService")
+        session = MediaSessionCompat(this, SESSION_TAG)
         sessionToken = session.sessionToken
         session.setCallback(callback)
-        session.setFlags(MediaSessionCompat.FLAG_HANDLES_MEDIA_BUTTONS or
-                MediaSessionCompat.FLAG_HANDLES_TRANSPORT_CONTROLS)
+        browseTree = BrowseTree(this)
+        Log.d(BROWSE_DEBUG, "OnCreateFinished")
     }
 
-    override fun onDestroy() {
-        session.release()
+    @PlaybackStateCompat.Actions
+    private fun getAvailableActions(): Long {
+        var actions = (PlaybackStateCompat.ACTION_PLAY_FROM_MEDIA_ID
+                or PlaybackStateCompat.ACTION_SKIP_TO_NEXT
+                or PlaybackStateCompat.ACTION_SKIP_TO_PREVIOUS
+                or PlaybackStateCompat.ACTION_SKIP_TO_QUEUE_ITEM)
+        actions = when (state) {
+            PlaybackStateCompat.STATE_STOPPED ->
+                (actions
+                        or PlaybackStateCompat.ACTION_PLAY
+                        or PlaybackStateCompat.ACTION_PAUSE)
+
+            PlaybackStateCompat.STATE_PLAYING ->
+                (actions
+                        or PlaybackStateCompat.ACTION_STOP
+                        or PlaybackStateCompat.ACTION_PAUSE)
+
+            PlaybackStateCompat.STATE_PAUSED ->
+                (actions
+                        or PlaybackStateCompat.ACTION_PLAY
+                        or PlaybackStateCompat.ACTION_STOP)
+
+            else ->
+                (actions
+                        or PlaybackStateCompat.ACTION_PLAY
+                        or PlaybackStateCompat.ACTION_PLAY_PAUSE
+                        or PlaybackStateCompat.ACTION_STOP
+                        or PlaybackStateCompat.ACTION_PAUSE)
+        }
+        return actions
     }
 
-    override fun onGetRoot(clientPackageName: String,
-                           clientUid: Int,
-                           rootHints: Bundle?): MediaBrowserServiceCompat.BrowserRoot? {
-        return MediaBrowserServiceCompat.BrowserRoot(MEDIA_ROOT_ID, null)
+    override fun onDestroy() = session.release()
+
+    override fun onGetRoot(
+        clientPackageName: String,
+        clientUid: Int,
+        rootHints: Bundle?
+    ): BrowserRoot? {
+        Log.d(BROWSE_DEBUG, "OnGetRootCalled")
+        return BrowserRoot(MEDIA_ROOT_ID, null)
     }
 
     override fun onLoadChildren(parentId: String, result: Result<MutableList<MediaItem>>) {
-        if (parentId == MEDIA_ROOT_ID) {
-
+        Log.d(BROWSE_DEBUG, "OnLoadChildren for: $parentId")
+        val resultsSent = browseTree.libraryCreator.whenReady { successfullyInitialized ->
+            if (successfullyInitialized) {
+                val children = browseTree[parentId]?.map { item ->
+                    Log.d(BROWSE_DEBUG, "MediaItem: ${item.description}, ${item.flag}")
+                    MediaItem(item.description, item.flag)
+                }?.toMutableList()
+                result.sendResult(children)
+            } else {
+                session.sendSessionEvent(FAILURE, null)
+                result.sendResult(null)
+            }
         }
-        result.sendResult(ArrayList())
+
+        if (!resultsSent)
+            result.detach()
+    }
+
+    inner class SoundCallback() :
+        MediaSessionCompat.Callback(), MediaPlayer.OnCompletionListener {
+
+        private var mediaPlayer: MediaPlayer? = null
+        private var queueIndex = -1
+        private var preparedMedia: MediaMetadataCompat? = null
+        private val playlist: MutableList<QueueItem> = ArrayList()
+
+        private fun initializeMediaPlayer() {
+            mediaPlayer = mediaPlayer ?: MediaPlayer()
+            mediaPlayer?.setOnCompletionListener(this)
+        }
+
+        private fun updateState() {
+            session.setPlaybackState(
+                PlaybackStateCompat.Builder()
+                    .setActions(getAvailableActions())
+                    .setState(
+                        state,
+                        if (mediaPlayer != null) mediaPlayer!!.currentPosition.toLong() else 0L,
+                        1.0f
+                    ).build()
+            )
+        }
+
+        override fun onPlay() {
+            if (playlist.isEmpty())
+                return
+
+            initializeMediaPlayer()
+
+            if (preparedMedia == null)
+                onPrepare()
+
+            val filepath = File(applicationContext.filesDir, preparedMedia!!.id)
+            mediaPlayer?.reset()
+            mediaPlayer?.setDataSource(filepath.toString())
+            Log.d(PLAY_DEBUG, "Playing this: $filepath")
+
+            if (!mediaPlayer!!.isPlaying) {
+                mediaPlayer?.prepare()
+                mediaPlayer?.start()
+                state = PlaybackStateCompat.STATE_PLAYING
+                updateState()
+            }
+        }
+
+        override fun onPrepare() {
+            if (queueIndex < 0 && playlist.isEmpty())
+                return
+
+            val mediaId = playlist[queueIndex].description.mediaId
+            preparedMedia = browseTree.libraryMap[mediaId]
+            session.setMetadata(preparedMedia)
+
+            if (!session.isActive)
+                session.isActive = true
+        }
+
+        override fun onSkipToQueueItem(queueId: Long) {
+            for (i in playlist.indices) {
+                if (playlist[i].queueId == queueId) {
+                    queueIndex = i
+                    preparedMedia = null
+                    onPlay()
+                    return
+                }
+            }
+        }
+
+        override fun onPlayFromMediaId(mediaId: String?, extras: Bundle?) {
+            if (mediaPlayer != null && mediaPlayer!!.isPlaying) {
+                onPause()
+            }
+            val mediaItem = browseTree.libraryMap[mediaId]
+            playlist.clear()
+            browseTree[mediaItem?.album.toString()]?.forEach {
+                val description = MediaDescriptionCompat.Builder()
+                    .setMediaId(it.id)
+                    .setTitle(it.title)
+                    .build()
+
+                playlist.add(QueueItem(description, description.hashCode().toLong()))
+                Log.d(PLAY_DEBUG, "Playlist item: ${description.mediaId}")
+            }
+            session.setQueue(playlist)
+            session.setQueueTitle(mediaItem?.album.toString())
+            for (i in playlist.indices) {
+                if (playlist[i].description.mediaId == mediaId) {
+                    queueIndex = i
+                    preparedMedia = null
+                    break
+                }
+            }
+            Log.d(PLAY_DEBUG, "Playing from media id: $mediaId")
+            onPlay()
+        }
+
+        override fun onPause() {
+            mediaPlayer?.pause()
+            state = PlaybackStateCompat.STATE_PAUSED
+            updateState()
+        }
+
+        override fun onStop() {
+            mediaPlayer?.stop()
+            mediaPlayer?.release()
+            queueIndex = -1
+            playlist.clear()
+            session.setMetadata(null)
+            session.setQueue(null)
+            session.setQueueTitle(null)
+            state = PlaybackStateCompat.STATE_STOPPED
+            updateState()
+        }
+
+        override fun onSkipToNext() {
+            if (++queueIndex < playlist.size) {
+                preparedMedia = null
+                onPlay()
+            } else {
+                queueIndex = 0
+                onPrepare()
+                state = PlaybackStateCompat.STATE_PAUSED
+                updateState()
+            }
+        }
+
+        override fun onSkipToPrevious() {
+            queueIndex = if (queueIndex > 0) queueIndex - 1 else playlist.size - 1
+            preparedMedia = null
+            onPlay()
+        }
+
+        override fun onCompletion(mp: MediaPlayer?) {
+            onSkipToNext()
+        }
     }
 }
+
+
+const val PLAY_DEBUG = "PlayDebug"
+const val SERVICE_DEBUG = "ServiceDebug"
+const val BROWSE_DEBUG = "BrowseDebug"
+const val FAILURE = "Couldn't load sounds"
+const val SESSION_TAG = "SoundService"

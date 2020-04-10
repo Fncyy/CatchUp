@@ -1,24 +1,18 @@
 package com.example.catchup
 
-import android.app.ActionBar
 import android.os.Bundle
 import android.speech.tts.TextToSpeech
-import android.util.Log
 import android.view.Menu
 import android.view.MenuItem
-import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
-import androidx.appcompat.widget.Toolbar
-import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.catchup.adapter.CategoryAdapter
 import com.example.catchup.adapter.NewsAdapter
-import com.example.catchup.model.CategoryResponse
-import com.example.catchup.model.NewsResponse
-import com.example.catchup.network.CurrentsInteractor
-import com.example.catchup.network.isConnected
+import com.example.catchup.shared.library.BrowseTree
+import com.example.catchup.shared.model.CategoryResponse
+import com.example.catchup.shared.model.NewsResponse
+import com.example.catchup.shared.network.CurrentsInteractor
 import kotlinx.android.synthetic.main.activity_main.*
-import okhttp3.internal.lockAndWaitNanos
 import java.io.File
 import java.util.*
 
@@ -27,12 +21,15 @@ class MainActivity : AppCompatActivity() {
     private lateinit var categoryAdapter: CategoryAdapter
     private lateinit var newsAdapter: NewsAdapter
     private lateinit var layoutManager: LinearLayoutManager
-    private val currentsInteractor = CurrentsInteractor()
+    private val currentsInteractor =
+        CurrentsInteractor()
     private val SAVED_NEWS_COUNT = 3
 
     private lateinit var tts: TextToSpeech
     private lateinit var file: File
     private lateinit var filePath: String
+
+    private lateinit var browseTree: BrowseTree
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -47,6 +44,8 @@ class MainActivity : AppCompatActivity() {
         //getLatestNews()
 
         filePath = applicationContext.filesDir.path
+
+        browseTree = BrowseTree(this)
 
         //testTTS()
     }
@@ -86,11 +85,6 @@ class MainActivity : AppCompatActivity() {
             file = File("$filePath/${category}_$i.wav")
             tts.synthesizeToFile(response.news[i].description, null, file, null)
         }
-    }
-
-    override fun onStop() {
-        //tts.shutdown()
-        super.onStop()
     }
 
     private fun getLatestNews() {

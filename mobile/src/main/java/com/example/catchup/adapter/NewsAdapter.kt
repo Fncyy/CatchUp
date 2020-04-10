@@ -6,7 +6,7 @@ import android.view.ViewGroup
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import com.example.catchup.R
-import com.example.catchup.model.News
+import com.example.catchup.shared.model.News
 import kotlinx.android.synthetic.main.main_news_row.view.*
 
 class NewsAdapter : RecyclerView.Adapter<NewsAdapter.ViewHolder>() {

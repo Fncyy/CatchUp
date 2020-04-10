@@ -1,8 +1,8 @@
-package com.example.catchup.network
+package com.example.catchup.shared.network
 
 import android.os.Handler
-import com.example.catchup.model.CategoryResponse
-import com.example.catchup.model.NewsResponse
+import com.example.catchup.shared.model.CategoryResponse
+import com.example.catchup.shared.model.NewsResponse
 import retrofit2.Call
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory

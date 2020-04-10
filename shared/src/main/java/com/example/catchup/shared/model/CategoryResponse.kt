@@ -1,4 +1,4 @@
-package com.example.catchup.model
+package com.example.catchup.shared.model
 
 data class CategoryResponse(
     val categories: List<String>,

@@ -1,4 +1,4 @@
-package com.example.catchup.network
+package com.example.catchup.shared.network
 
 import android.content.Context
 import android.net.ConnectivityManager
