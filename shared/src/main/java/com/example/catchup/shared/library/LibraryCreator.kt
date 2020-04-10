@@ -66,14 +66,14 @@ class LibraryCreator(private val context: Context) : UtteranceProgressListener()
     init {
         try {
             val input: FileInputStream = context.openFileInput(SELECTED_SAVE_FILE)
-            //selected.addAll(0, input.readBytes().toString(Charsets.UTF_8).split(", "))
+            selected.addAll(0, input.readBytes().toString(Charsets.UTF_8).split(", "))
             input.close()
         } catch (e: Exception) {
             e.printStackTrace()
         }
 
 
-        selected.addAll(CATEGORY_HARDCODED)
+        //selected.addAll(CATEGORY_HARDCODED)
         Log.d(SERVICE_DEBUG, "fileDir: ${fileDir.absolutePath}")
         clearFiles()
 
