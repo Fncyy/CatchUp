@@ -24,7 +24,8 @@ class CategoryAdapter(val context: Context) : RecyclerView.Adapter<CategoryAdapt
     private var selectedCount = 0
     private val MAX_SELECTED_COUNT = 4
 
-    fun addList(list: List<String>) {
+    fun setList(list: List<String>) {
+        categories.clear()
         val selected = mutableListOf<String>()
         try {
             val input: FileInputStream = context.openFileInput(SELECTED_SAVE_FILE)
@@ -49,6 +50,7 @@ class CategoryAdapter(val context: Context) : RecyclerView.Adapter<CategoryAdapt
             }
         }
         notifyItemRangeChanged(0, categories.size)
+        selectedCount = getSelectedCount()
     }
 
     private fun getSelectedCount(): Int {

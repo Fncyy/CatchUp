@@ -6,7 +6,6 @@ import android.view.Menu
 import android.view.MenuItem
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
-import androidx.recyclerview.widget.RecyclerView
 import com.example.catchup.adapter.CategoryAdapter
 import com.example.catchup.adapter.NewsAdapter
 import com.example.catchup.shared.library.BrowseTree
@@ -22,8 +21,7 @@ class MainActivity : AppCompatActivity() {
     private lateinit var categoryAdapter: CategoryAdapter
     private lateinit var newsAdapter: NewsAdapter
     private lateinit var layoutManager: LinearLayoutManager
-    private val currentsInteractor =
-        CurrentsInteractor()
+    private val currentsInteractor = CurrentsInteractor()
     private val SAVED_NEWS_COUNT = 3
 
     private lateinit var tts: TextToSpeech
@@ -104,7 +102,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun showCategories(response: CategoryResponse) {
-        categoryAdapter.addList(response.categories)
+        categoryAdapter.setList(response.categories)
     }
 
     private fun showNews(response: NewsResponse) {
