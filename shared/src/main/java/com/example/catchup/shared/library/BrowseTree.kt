@@ -22,7 +22,7 @@ class BrowseTree(context: Context) {
         libraryCreator.whenReady { successfullyInitialized ->
                 if (successfullyInitialized) {
                     val metadata = libraryCreator.buildMetadata()
-                    metadata.forEach { mediaItem ->
+                    metadata.sortedBy { it.album }.forEach { mediaItem ->
                         libraryMap[mediaItem.id] = mediaItem
                         val albumMediaId = mediaItem.album
                         val albumChildren = mediaIdToChildren[albumMediaId] ?: buildAlbumRoot(mediaItem)

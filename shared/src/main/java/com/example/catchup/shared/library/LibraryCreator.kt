@@ -2,6 +2,7 @@ package com.example.catchup.shared.library
 
 import android.content.Context
 import android.print.PrintJobInfo.STATE_CREATED
+import android.provider.MediaStore
 import android.speech.tts.TextToSpeech
 import android.speech.tts.UtteranceProgressListener
 import android.support.v4.media.MediaMetadataCompat
@@ -10,7 +11,6 @@ import android.util.Log
 import androidx.annotation.IntDef
 import com.example.catchup.shared.BROWSE_DEBUG
 import com.example.catchup.shared.SERVICE_DEBUG
-import com.example.catchup.shared.library.LibraryCreator.Companion.CATEGORY_HARDCODED
 import com.example.catchup.shared.model.NewsResponse
 import com.example.catchup.shared.network.CurrentsInteractor
 import com.google.gson.Gson
@@ -33,7 +33,7 @@ class LibraryCreator(private val context: Context) : UtteranceProgressListener()
             "third",
             "fourth"
         )
-        val CATEGORY_HARDCODED = listOf("general", "auto", "politics")
+        val CATEGORY_HARDCODED = listOf("auto", "general", "politics", "technology")
         const val SAVED_NEWS_COUNT = 3
     }
 
@@ -72,7 +72,6 @@ class LibraryCreator(private val context: Context) : UtteranceProgressListener()
             e.printStackTrace()
         }
 
-
         //selected.addAll(CATEGORY_HARDCODED)
         Log.d(SERVICE_DEBUG, "fileDir: ${fileDir.absolutePath}")
         clearFiles()
@@ -103,7 +102,7 @@ class LibraryCreator(private val context: Context) : UtteranceProgressListener()
 
     fun buildMetadata(): List<MediaMetadataCompat> =
         library.music.map { jsonMusic ->
-            Log.d(BROWSE_DEBUG, jsonMusic.id)
+            Log.d("SelectedDebug", jsonMusic.id)
             MediaMetadataCompat.Builder().from(jsonMusic).build()
         }.toList()
 
