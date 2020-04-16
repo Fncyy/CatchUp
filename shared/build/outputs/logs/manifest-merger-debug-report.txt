@@ -1,0 +1,61 @@
+-- Merging decision tree log ---
+manifest
+ADDED from D:\Github Projects\CatchUp\shared\src\main\AndroidManifest.xml:1:1-26:12
+INJECTED from D:\Github Projects\CatchUp\shared\src\main\AndroidManifest.xml:1:1-26:12
+INJECTED from D:\Github Projects\CatchUp\shared\src\main\AndroidManifest.xml:1:1-26:12
+INJECTED from D:\Github Projects\CatchUp\shared\src\main\AndroidManifest.xml:1:1-26:12
+INJECTED from D:\Github Projects\CatchUp\shared\src\main\AndroidManifest.xml:1:1-26:12
+INJECTED from D:\Github Projects\CatchUp\shared\src\main\AndroidManifest.xml:1:1-26:12
+INJECTED from D:\Github Projects\CatchUp\shared\src\main\AndroidManifest.xml:1:1-26:12
+	package
+		ADDED from D:\Github Projects\CatchUp\shared\src\main\AndroidManifest.xml:2:5-41
+		INJECTED from D:\Github Projects\CatchUp\shared\src\main\AndroidManifest.xml
+		INJECTED from D:\Github Projects\CatchUp\shared\src\main\AndroidManifest.xml
+	android:versionName
+		INJECTED from D:\Github Projects\CatchUp\shared\src\main\AndroidManifest.xml
+		ADDED from D:\Github Projects\CatchUp\shared\src\main\AndroidManifest.xml:1:1-26:12
+		INJECTED from D:\Github Projects\CatchUp\shared\src\main\AndroidManifest.xml
+	android:versionCode
+		INJECTED from D:\Github Projects\CatchUp\shared\src\main\AndroidManifest.xml
+		ADDED from D:\Github Projects\CatchUp\shared\src\main\AndroidManifest.xml:1:1-26:12
+		INJECTED from D:\Github Projects\CatchUp\shared\src\main\AndroidManifest.xml
+	xmlns:android
+		ADDED from D:\Github Projects\CatchUp\shared\src\main\AndroidManifest.xml:1:11-69
+uses-permission#android.permission.INTERNET
+ADDED from D:\Github Projects\CatchUp\shared\src\main\AndroidManifest.xml:4:5-66
+	android:name
+		ADDED from D:\Github Projects\CatchUp\shared\src\main\AndroidManifest.xml:4:22-64
+application
+ADDED from D:\Github Projects\CatchUp\shared\src\main\AndroidManifest.xml:6:5-24:19
+meta-data#com.google.android.gms.car.application
+ADDED from D:\Github Projects\CatchUp\shared\src\main\AndroidManifest.xml:8:9-10:59
+	android:resource
+		ADDED from D:\Github Projects\CatchUp\shared\src\main\AndroidManifest.xml:10:13-56
+	android:name
+		ADDED from D:\Github Projects\CatchUp\shared\src\main\AndroidManifest.xml:9:13-66
+service#com.example.catchup.shared.SoundService
+ADDED from D:\Github Projects\CatchUp\shared\src\main\AndroidManifest.xml:16:9-22:19
+	android:exported
+		ADDED from D:\Github Projects\CatchUp\shared\src\main\AndroidManifest.xml:18:13-36
+	android:name
+		ADDED from D:\Github Projects\CatchUp\shared\src\main\AndroidManifest.xml:17:13-67
+intent-filter#action:name:android.media.browse.MediaBrowserService
+ADDED from D:\Github Projects\CatchUp\shared\src\main\AndroidManifest.xml:19:13-21:29
+action#android.media.browse.MediaBrowserService
+ADDED from D:\Github Projects\CatchUp\shared\src\main\AndroidManifest.xml:20:17-83
+	android:name
+		ADDED from D:\Github Projects\CatchUp\shared\src\main\AndroidManifest.xml:20:25-80
+uses-sdk
+INJECTED from D:\Github Projects\CatchUp\shared\src\main\AndroidManifest.xml reason: use-sdk injection requested
+INJECTED from D:\Github Projects\CatchUp\shared\src\main\AndroidManifest.xml
+INJECTED from D:\Github Projects\CatchUp\shared\src\main\AndroidManifest.xml
+INJECTED from D:\Github Projects\CatchUp\shared\src\main\AndroidManifest.xml
+INJECTED from D:\Github Projects\CatchUp\shared\src\main\AndroidManifest.xml
+	android:targetSdkVersion
+		INJECTED from D:\Github Projects\CatchUp\shared\src\main\AndroidManifest.xml
+		ADDED from D:\Github Projects\CatchUp\shared\src\main\AndroidManifest.xml
+		INJECTED from D:\Github Projects\CatchUp\shared\src\main\AndroidManifest.xml
+	android:minSdkVersion
+		INJECTED from D:\Github Projects\CatchUp\shared\src\main\AndroidManifest.xml
+		ADDED from D:\Github Projects\CatchUp\shared\src\main\AndroidManifest.xml
+		INJECTED from D:\Github Projects\CatchUp\shared\src\main\AndroidManifest.xml

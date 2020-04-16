@@ -72,7 +72,6 @@ class LibraryCreator(private val context: Context) : UtteranceProgressListener()
             e.printStackTrace()
         }
 
-        //selected.addAll(CATEGORY_HARDCODED)
         Log.d(SERVICE_DEBUG, "fileDir: ${fileDir.absolutePath}")
         clearFiles()
 
