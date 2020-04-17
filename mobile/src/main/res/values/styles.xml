@@ -10,7 +10,7 @@
     </style>
 
     <style name="TextView" parent="android:Widget.TextView">
-        <item name="android:textColor">@color/primary</item>
+        <item name="android:textColor">@color/primary_text</item>
     </style>
 
     <style name="ChoiceOptionStyle">

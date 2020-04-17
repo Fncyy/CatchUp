@@ -1,57 +1,97 @@
 package com.example.catchup
 
+import android.annotation.SuppressLint
+import android.app.ActionBar
+import android.content.Context
 import android.os.Bundle
-import android.speech.tts.TextToSpeech
-import android.view.Menu
 import android.view.MenuItem
+import android.view.View
+import android.view.animation.RotateAnimation
+import android.widget.ImageButton
+import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.catchup.adapter.CategoryAdapter
-import com.example.catchup.adapter.NewsAdapter
+import com.example.catchup.fragments.SettingsFragment
 import com.example.catchup.shared.library.BrowseTree
 import com.example.catchup.shared.model.CategoryResponse
-import com.example.catchup.shared.model.NewsResponse
 import com.example.catchup.shared.network.CurrentsInteractor
+import com.example.catchup.shared.network.isConnected
 import kotlinx.android.synthetic.main.activity_main.*
-import java.io.File
-import java.util.*
+import uk.co.samuelwall.materialtaptargetprompt.MaterialTapTargetPrompt
+
 
 class MainActivity : AppCompatActivity() {
 
     private lateinit var categoryAdapter: CategoryAdapter
-    private lateinit var newsAdapter: NewsAdapter
     private lateinit var layoutManager: LinearLayoutManager
     private val currentsInteractor = CurrentsInteractor()
-    private val SAVED_NEWS_COUNT = 3
 
-    private lateinit var tts: TextToSpeech
-    private lateinit var file: File
     private lateinit var filePath: String
 
     private lateinit var browseTree: BrowseTree
+    var btnRefresh: ImageButton? = null
+    var btnPreferences: ImageButton? = null
 
+    @SuppressLint("WrongConstant")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
+        supportActionBar?.displayOptions = ActionBar.DISPLAY_SHOW_CUSTOM
+        supportActionBar?.setCustomView(R.layout.toolbar_main)
+
+        btnRefresh = supportActionBar?.customView?.findViewById(R.id.toolbar_main_refresh)
+        btnPreferences = supportActionBar?.customView?.findViewById(R.id.toolbar_main_preferences)
+
+        btnRefresh?.setOnClickListener {
+            getAvailableCategories()
+            it.clearAnimation()
+            val anim =
+                RotateAnimation(0F, 360F, (it.width / 2).toFloat(), (it.height / 2).toFloat())
+            anim.fillAfter = true
+            anim.repeatCount = 0
+            anim.duration = 1000
+            it.startAnimation(anim)
+        }
+
+        btnPreferences?.setOnClickListener {
+            btnPreferences?.isClickable = false
+            rvMain.visibility = View.GONE
+            supportFragmentManager
+                .beginTransaction()
+                .addToBackStack("Settings")
+                .replace(R.id.layoutMain, SettingsFragment())
+                .commit()
+        }
+
         categoryAdapter = CategoryAdapter(this)
-        newsAdapter = NewsAdapter()
         rvMain.adapter = categoryAdapter
         layoutManager = LinearLayoutManager(this)
         rvMain.layoutManager = layoutManager
         getAvailableCategories()
-        //getLatestNews()
 
         filePath = applicationContext.filesDir.path
 
         browseTree = BrowseTree(this)
 
-        //testTTS()
+
+        MaterialTapTargetPrompt.Builder(this)
+            .setTarget(R.id.toolbar_main_refresh)
+            .setFocalColour(getColor(R.color.choiceItemActiveBackground))
+            .setBackgroundColour(getColor(R.color.primary_dark))
+            .setPrimaryText("Refresh")
+            .setSecondaryText("Reloads the available categories")
+            .show()
+
+        saveFirstStart()
     }
 
-    override fun onCreateOptionsMenu(menu: Menu?): Boolean {
-        menuInflater.inflate(R.menu.menu_main, menu)
-        return true
+    override fun onBackPressed() {
+        btnPreferences?.isClickable = true
+        rvMain.visibility = View.VISIBLE
+
+        super.onBackPressed()
     }
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
@@ -59,39 +99,6 @@ class MainActivity : AppCompatActivity() {
             R.id.menuReload -> getAvailableCategories()
         }
         return super.onOptionsItemSelected(item)
-    }
-
-    private fun testTTS() {
-        //val filePath = applicationContext.filesDir.path + "/hello.wav"
-        file = File(filePath)
-        tts = TextToSpeech(this, TextToSpeech.OnInitListener { status ->
-            if (status != TextToSpeech.ERROR) {
-                tts.language = Locale.UK
-
-                categoryAdapter.getSelectedItems().forEach {
-                    currentsInteractor.getCategory(
-                        onSuccessWithString = this::saveNewsByCategory,
-                        onError = this::showError,
-                        category = it
-                    )
-                }
-            }
-        })
-    }
-
-    private fun saveNewsByCategory(response: NewsResponse, category: String) {
-        for (i in 0 until SAVED_NEWS_COUNT) {
-            file = File("$filePath/${category}_$i.wav")
-            tts.synthesizeToFile(response.news[i].description, null, file, null)
-        }
-    }
-
-    private fun getLatestNews() {
-        currentsInteractor.getLatestNews(
-            onSuccess = this::showNews,
-            onError = this::showError
-        )
-
     }
 
     private fun getAvailableCategories() {
@@ -105,11 +112,29 @@ class MainActivity : AppCompatActivity() {
         categoryAdapter.setList(response.categories)
     }
 
-    private fun showNews(response: NewsResponse) {
-        newsAdapter.addList(response.news)
-    }
-
     private fun showError(e: Throwable) {
         e.printStackTrace()
+        val alertDialog = AlertDialog.Builder(this)
+            .setNegativeButton("Cancel") { _, _ -> }
+            .setPositiveButton("Retry") { _, _ -> getAvailableCategories() }
+
+        if (!isConnected())
+            alertDialog
+                .setMessage("It seems you are not connected to the internet. \nPress \"Retry\" to try to establish connection again or \"Cancel\" to close this dialog.")
+                .setTitle("No connection")
+        else
+            alertDialog
+                .setMessage("It seems the server is unavailable at this time. \nPress \"Retry\" to try to establish connection again or \"Cancel\" to close this dialog.")
+                .setTitle("Server unavailable")
+        alertDialog.show()
+
     }
+
+    private fun saveFirstStart() = with(this.getPreferences(Context.MODE_PRIVATE).edit()) {
+        putBoolean("KEY_STARTED", true)
+        commit()
+    }
+
+    private fun isFirstStart(): Boolean =
+        (this.getPreferences(Context.MODE_PRIVATE).getBoolean("KEY_STARTED", false))
 }

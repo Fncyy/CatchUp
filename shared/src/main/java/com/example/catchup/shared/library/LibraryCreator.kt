@@ -2,17 +2,17 @@ package com.example.catchup.shared.library
 
 import android.content.Context
 import android.print.PrintJobInfo.STATE_CREATED
-import android.provider.MediaStore
 import android.speech.tts.TextToSpeech
 import android.speech.tts.UtteranceProgressListener
 import android.support.v4.media.MediaMetadataCompat
 import android.telecom.Connection.STATE_INITIALIZING
 import android.util.Log
 import androidx.annotation.IntDef
-import com.example.catchup.shared.BROWSE_DEBUG
+import com.example.catchup.shared.R
 import com.example.catchup.shared.SERVICE_DEBUG
 import com.example.catchup.shared.model.NewsResponse
 import com.example.catchup.shared.network.CurrentsInteractor
+import com.example.catchup.shared.network.isConnected
 import com.google.gson.Gson
 import java.io.File
 import java.io.FileInputStream
@@ -27,14 +27,8 @@ class LibraryCreator(private val context: Context) : UtteranceProgressListener()
     companion object {
         const val SELECTED_SAVE_FILE = "selected.txt"
         const val METADATA_FILE = "metadata.json"
-        val UTTERANCE_IDS = listOf<String>(
-            "first",
-            "second",
-            "third",
-            "fourth"
-        )
-        val CATEGORY_HARDCODED = listOf("auto", "general", "politics", "technology")
-        const val SAVED_NEWS_COUNT = 3
+        var SAVED_NEWS_COUNT = 3
+        const val MAX_FAILED_API_CALLS = 4
     }
 
     @State
@@ -60,10 +54,17 @@ class LibraryCreator(private val context: Context) : UtteranceProgressListener()
     private var selected: MutableList<String> = mutableListOf()
     private var fileDir: File = context.applicationContext.filesDir
     private var textToSpeech: TextToSpeech
+    private var errorCount = 0
+    private var ttsStatus: Int = -1
 
     private lateinit var file: File
 
     init {
+        SAVED_NEWS_COUNT = context.getSharedPreferences(
+            context.getString(R.string.settings_file_key),
+            Context.MODE_PRIVATE
+        ).getInt(context.getString(R.string.KEY_NEWS), SAVED_NEWS_COUNT)
+
         try {
             val input: FileInputStream = context.openFileInput(SELECTED_SAVE_FILE)
             selected.addAll(0, input.readBytes().toString(Charsets.UTF_8).split(", "))
@@ -144,6 +145,12 @@ class LibraryCreator(private val context: Context) : UtteranceProgressListener()
 
     private fun showError(e: Throwable) {
         e.printStackTrace()
+        if (!isConnected())
+            state = STATE_ERROR
+        if (++errorCount > MAX_FAILED_API_CALLS)
+            state = STATE_ERROR
+        else
+            onInit(ttsStatus)
     }
 
     private fun allLoaded(): Boolean {
@@ -180,6 +187,7 @@ class LibraryCreator(private val context: Context) : UtteranceProgressListener()
     }
 
     override fun onInit(status: Int) {
+        ttsStatus = status
         if (status != TextToSpeech.ERROR) {
             textToSpeech.language = Locale.UK
             textToSpeech.setOnUtteranceProgressListener(this)

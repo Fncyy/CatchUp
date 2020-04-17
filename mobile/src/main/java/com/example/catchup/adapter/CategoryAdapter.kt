@@ -11,18 +11,31 @@ import com.example.catchup.shared.library.LibraryCreator.Companion.SELECTED_SAVE
 import kotlinx.android.synthetic.main.main_row_item.view.*
 import java.io.FileInputStream
 import java.io.FileOutputStream
-import java.lang.Exception
 
-class CategoryAdapter(val context: Context) : RecyclerView.Adapter<CategoryAdapter.ViewHolder>() {
+class CategoryAdapter(private val context: Context) :
+    RecyclerView.Adapter<CategoryAdapter.ViewHolder>() {
 
     data class Category(
         val name: String,
         var selected: Boolean = false
     )
 
+    companion object {
+        var MAX_SELECTED_COUNT = 4
+    }
+
     private val categories = mutableListOf<Category>()
     private var selectedCount = 0
-    private val MAX_SELECTED_COUNT = 4
+
+    init {
+        MAX_SELECTED_COUNT = context.getSharedPreferences(
+            context.getString(com.example.catchup.shared.R.string.settings_file_key),
+            Context.MODE_PRIVATE
+        ).getInt(
+            context.getString(com.example.catchup.shared.R.string.KEY_CATEGORIES),
+            MAX_SELECTED_COUNT
+        )
+    }
 
     fun setList(list: List<String>) {
         categories.clear()
