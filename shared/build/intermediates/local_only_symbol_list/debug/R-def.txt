@@ -1,0 +1,9 @@
+R_DEF: Internal format may change without notice
+local
+color ic_launcher_background
+drawable album_jazz_blues
+drawable album_youtube_audio_library_rock_2
+mipmap ic_launcher
+mipmap ic_launcher_foreground
+mipmap ic_launcher_round
+xml automotive_app_desc

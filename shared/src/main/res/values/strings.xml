@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="settings_file_key">com.example.catchup_preferences.xml</string>
+    <string name="KEY_NEWS">news</string>
+    <string name="KEY_CATEGORIES">categories</string>
+</resources>

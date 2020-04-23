@@ -1,3 +1,12 @@
 <resources>
     <string name="app_name">CatchUp</string>
+    <string name="reload">Reload</string>
+    <string name="main_reload_categories">Reload categories</string>
+    <string name="settings_categories">Maximum number of categories selectable</string>
+    <string name="settings_news">Number of news items per category</string>
+    <string name="settings_warning">Selecting higher numbers may result in longer loading times</string>
+    <string name="settings_category_main">Settings</string>
+    <string name="settings_category_warning">Warning</string>
+    <string name="description_reload_categories">Reload categories</string>
+    <string name="description_preferences">Preferences</string>
 </resources>
