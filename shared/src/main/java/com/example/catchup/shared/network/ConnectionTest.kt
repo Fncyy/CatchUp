@@ -1,11 +1,6 @@
 package com.example.catchup.shared.network
 
-import android.content.Context
-import android.net.ConnectivityManager
 import java.io.IOException
-import java.net.InetAddress
-import java.net.UnknownHostException
-
 
 @Throws(InterruptedException::class, IOException::class)
 fun isConnected(): Boolean {

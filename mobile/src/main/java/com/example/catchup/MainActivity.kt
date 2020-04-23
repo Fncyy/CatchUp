@@ -1,13 +1,11 @@
 package com.example.catchup
 
-import android.annotation.SuppressLint
-import android.app.ActionBar
 import android.content.Context
 import android.os.Bundle
-import android.view.MenuItem
 import android.view.View
 import android.view.animation.RotateAnimation
 import android.widget.ImageButton
+import androidx.appcompat.app.ActionBar
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -30,10 +28,9 @@ class MainActivity : AppCompatActivity() {
     private lateinit var filePath: String
 
     private lateinit var browseTree: BrowseTree
-    var btnRefresh: ImageButton? = null
-    var btnPreferences: ImageButton? = null
+    private var btnRefresh: ImageButton? = null
+    private var btnPreferences: ImageButton? = null
 
-    @SuppressLint("WrongConstant")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
@@ -75,14 +72,14 @@ class MainActivity : AppCompatActivity() {
 
         browseTree = BrowseTree(this)
 
-
-        MaterialTapTargetPrompt.Builder(this)
-            .setTarget(R.id.toolbar_main_refresh)
-            .setFocalColour(getColor(R.color.choiceItemActiveBackground))
-            .setBackgroundColour(getColor(R.color.primary_dark))
-            .setPrimaryText("Refresh")
-            .setSecondaryText("Reloads the available categories")
-            .show()
+        if (isFirstStart())
+            MaterialTapTargetPrompt.Builder(this)
+                .setTarget(R.id.toolbar_main_refresh)
+                .setFocalColour(getColor(R.color.choiceItemActiveBackground))
+                .setBackgroundColour(getColor(R.color.primary_dark))
+                .setPrimaryText("Refresh")
+                .setSecondaryText("Reloads the available categories")
+                .show()
 
         saveFirstStart()
     }
@@ -90,15 +87,7 @@ class MainActivity : AppCompatActivity() {
     override fun onBackPressed() {
         btnPreferences?.isClickable = true
         rvMain.visibility = View.VISIBLE
-
         super.onBackPressed()
-    }
-
-    override fun onOptionsItemSelected(item: MenuItem): Boolean {
-        when (item.itemId) {
-            R.id.menuReload -> getAvailableCategories()
-        }
-        return super.onOptionsItemSelected(item)
     }
 
     private fun getAvailableCategories() {
@@ -114,19 +103,23 @@ class MainActivity : AppCompatActivity() {
 
     private fun showError(e: Throwable) {
         e.printStackTrace()
-        val alertDialog = AlertDialog.Builder(this)
+        val alertMessage: String
+        val alertTitle: String
+        if (!isConnected()) {
+            alertMessage =
+                "It seems you are not connected to the internet. \nPress \"Retry\" to try to establish connection again or \"Cancel\" to close this dialog."
+            alertTitle = "No connection"
+        } else {
+            alertMessage =
+                "It seems the server is unavailable at this time. \nPress \"Retry\" to try to establish connection again or \"Cancel\" to close this dialog."
+            alertTitle = "Server unavailable"
+        }
+        AlertDialog.Builder(this)
             .setNegativeButton("Cancel") { _, _ -> }
             .setPositiveButton("Retry") { _, _ -> getAvailableCategories() }
-
-        if (!isConnected())
-            alertDialog
-                .setMessage("It seems you are not connected to the internet. \nPress \"Retry\" to try to establish connection again or \"Cancel\" to close this dialog.")
-                .setTitle("No connection")
-        else
-            alertDialog
-                .setMessage("It seems the server is unavailable at this time. \nPress \"Retry\" to try to establish connection again or \"Cancel\" to close this dialog.")
-                .setTitle("Server unavailable")
-        alertDialog.show()
+            .setMessage(alertMessage)
+            .setTitle(alertTitle)
+            .show()
 
     }
 
@@ -136,5 +129,5 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun isFirstStart(): Boolean =
-        (this.getPreferences(Context.MODE_PRIVATE).getBoolean("KEY_STARTED", false))
+        !(this.getPreferences(Context.MODE_PRIVATE).getBoolean("KEY_STARTED", false))
 }

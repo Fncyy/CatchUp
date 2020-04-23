@@ -20,6 +20,7 @@ class SettingsFragment : PreferenceFragmentCompat(), Preference.OnPreferenceChan
         categoriesPreference.min = 1
         categoriesPreference.max = 8
         categoriesPreference.onPreferenceChangeListener = this
+        categoriesPreference.showSeekBarValue = true
 
         val newsPreference = SeekBarPreference(context)
         newsPreference.key = getString(R.string.KEY_NEWS)
@@ -27,6 +28,7 @@ class SettingsFragment : PreferenceFragmentCompat(), Preference.OnPreferenceChan
         newsPreference.min = 3
         newsPreference.max = 8
         newsPreference.onPreferenceChangeListener = this
+        newsPreference.showSeekBarValue = true
 
         val settingsCategory = PreferenceCategory(context)
         settingsCategory.title = getString(R.string.settings_category_main)

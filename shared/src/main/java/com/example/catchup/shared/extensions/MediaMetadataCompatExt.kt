@@ -12,12 +12,6 @@ inline val MediaMetadataCompat.title: String?
 inline val MediaMetadataCompat.album: String?
     get() = getString(MediaMetadataCompat.METADATA_KEY_ALBUM)
 
-inline val MediaMetadataCompat.displayTitle: String?
-    get() = getString(MediaMetadataCompat.METADATA_KEY_DISPLAY_TITLE)
-
-inline val MediaMetadataCompat.displayDescription: String?
-    get() = getString(MediaMetadataCompat.METADATA_KEY_DISPLAY_DESCRIPTION)
-
 @MediaBrowserCompat.MediaItem.Flags
 inline val MediaMetadataCompat.flag
     get() = this.getLong(METADATA_MEDIA_FLAGS).toInt()

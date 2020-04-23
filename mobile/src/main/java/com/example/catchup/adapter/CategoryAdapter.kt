@@ -74,15 +74,6 @@ class CategoryAdapter(private val context: Context) :
         return count
     }
 
-    fun getSelectedItems(): List<String> {
-        val list = mutableListOf<String>()
-        categories.forEach {
-            if (it.selected)
-                list.add(it.name)
-        }
-        return list
-    }
-
     private fun getSelectedItemsForStorage(): String {
         var str = ""
         var first = true
@@ -129,7 +120,8 @@ class CategoryAdapter(private val context: Context) :
                 view.isSelected = !view.isSelected
                 category.selected = !category.selected
                 val content = getSelectedItemsForStorage()
-                val out: FileOutputStream = context.openFileOutput(SELECTED_SAVE_FILE, Context.MODE_PRIVATE)
+                val out: FileOutputStream =
+                    context.openFileOutput(SELECTED_SAVE_FILE, Context.MODE_PRIVATE)
                 out.write(content.toByteArray())
                 out.close()
             }
