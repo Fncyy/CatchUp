@@ -25,9 +25,6 @@ class MainActivity : AppCompatActivity() {
     private lateinit var layoutManager: LinearLayoutManager
     private val currentsInteractor = CurrentsInteractor()
 
-    private lateinit var filePath: String
-
-    private lateinit var browseTree: BrowseTree
     private var btnRefresh: ImageButton? = null
     private var btnPreferences: ImageButton? = null
 
@@ -67,10 +64,6 @@ class MainActivity : AppCompatActivity() {
         layoutManager = LinearLayoutManager(this)
         rvMain.layoutManager = layoutManager
         getAvailableCategories()
-
-        filePath = applicationContext.filesDir.path
-
-        browseTree = BrowseTree(this)
 
         if (isFirstStart())
             MaterialTapTargetPrompt.Builder(this)
