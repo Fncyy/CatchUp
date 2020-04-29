@@ -20,6 +20,23 @@ class CurrentsInteractor {
         this.currentsApi = retrofit.create(CurrentsAPI::class.java)
     }
 
+    fun getAvailableCategories(
+        onSuccess: (CategoryResponse) -> Unit,
+        onError: (Throwable) -> Unit
+    ) {
+        val getCategoriesRequest = currentsApi.getAvailableCategories()
+        runCallOnBackgroundThread(getCategoriesRequest, onSuccess, null, onError)
+    }
+
+    fun getCategory(
+        onSuccessWithString: (NewsResponse, String) -> Unit,
+        onError: (Throwable) -> Unit,
+        category: String
+    ) {
+        val getNewsRequest = currentsApi.getCategory(category)
+        runCallOnBackgroundThreadWithString(getNewsRequest, onSuccessWithString, onError, category)
+    }
+
     private fun <T> runCallOnBackgroundThread(
         call: Call<T>,
         onSuccess: ((T) -> Unit)?,
@@ -62,30 +79,5 @@ class CurrentsInteractor {
                 handler.post { onError(e) }
             }
         }.start()
-    }
-
-    fun getLatestNews(
-        onSuccess: (NewsResponse) -> Unit,
-        onError: (Throwable) -> Unit
-    ) {
-        val getNewsRequest = currentsApi.getLatestNews()
-        runCallOnBackgroundThread(getNewsRequest, onSuccess, null, onError)
-    }
-
-    fun getAvailableCategories(
-        onSuccess: (CategoryResponse) -> Unit,
-        onError: (Throwable) -> Unit
-    ) {
-        val getCategoriesRequest = currentsApi.getAvailableCategories()
-        runCallOnBackgroundThread(getCategoriesRequest, onSuccess, null, onError)
-    }
-
-    fun getCategory(
-        onSuccessWithString: (NewsResponse, String) -> Unit,
-        onError: (Throwable) -> Unit,
-        category: String
-    ) {
-        val getNewsRequest = currentsApi.getCategory(category)
-        runCallOnBackgroundThreadWithString(getNewsRequest, onSuccessWithString, onError, category)
     }
 }

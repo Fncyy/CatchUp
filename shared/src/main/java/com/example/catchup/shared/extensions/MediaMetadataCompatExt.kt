@@ -47,20 +47,6 @@ inline var MediaMetadataCompat.Builder.mediaUri: String?
         putString(MediaMetadataCompat.METADATA_KEY_MEDIA_URI, value)
     }
 
-inline var MediaMetadataCompat.Builder.displayTitle: String?
-    @Deprecated(NO_GET, level = DeprecationLevel.ERROR)
-    get() = throw IllegalAccessException(GETTER_ERROR)
-    set(value) {
-        putString(MediaMetadataCompat.METADATA_KEY_DISPLAY_TITLE, value)
-    }
-
-inline var MediaMetadataCompat.Builder.displayDescription: String?
-    @Deprecated(NO_GET, level = DeprecationLevel.ERROR)
-    get() = throw IllegalAccessException(GETTER_ERROR)
-    set(value) {
-        putString(MediaMetadataCompat.METADATA_KEY_DISPLAY_DESCRIPTION, value)
-    }
-
 @MediaBrowserCompat.MediaItem.Flags
 inline var MediaMetadataCompat.Builder.flag: Int
     @Deprecated(NO_GET, level = DeprecationLevel.ERROR)

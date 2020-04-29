@@ -1,15 +1,11 @@
 package com.example.catchup.shared.library
 
 import android.content.Context
-import android.print.PrintJobInfo.STATE_CREATED
 import android.speech.tts.TextToSpeech
 import android.speech.tts.UtteranceProgressListener
 import android.support.v4.media.MediaMetadataCompat
-import android.telecom.Connection.STATE_INITIALIZING
-import android.util.Log
 import androidx.annotation.IntDef
 import com.example.catchup.shared.R
-import com.example.catchup.shared.SERVICE_DEBUG
 import com.example.catchup.shared.model.NewsResponse
 import com.example.catchup.shared.network.CurrentsInteractor
 import com.example.catchup.shared.network.isConnected
@@ -73,7 +69,6 @@ class LibraryCreator(private val context: Context) : UtteranceProgressListener()
             e.printStackTrace()
         }
 
-        Log.d(SERVICE_DEBUG, "fileDir: ${fileDir.absolutePath}")
         clearFiles()
 
         selected.forEach { category ->
@@ -101,15 +96,18 @@ class LibraryCreator(private val context: Context) : UtteranceProgressListener()
         }
 
     fun buildMetadata(): List<MediaMetadataCompat> =
-        library.music.map { jsonMusic ->
-            Log.d("SelectedDebug", jsonMusic.id)
+        library.news.map { jsonMusic ->
             MediaMetadataCompat.Builder().from(jsonMusic).build()
         }.toList()
 
+
+    /**
+     * Clears the data folder
+     * Recreates [SELECTED_SAVE_FILE]
+     */
     private fun clearFiles() {
         fileDir.listFiles()?.forEach {
             it.delete()
-            Log.d(SERVICE_DEBUG, "File deleted: $it")
         }
         var content = ""
         var first = true
@@ -132,11 +130,11 @@ class LibraryCreator(private val context: Context) : UtteranceProgressListener()
             filename = "${category}_$i.wav"
             file = File(fileDir, filename)
             textToSpeech.synthesizeToFile(response.news[i].description, null, file, filename)
-            library.music.add(
-                JsonMusic(
+            library.news.add(
+                JsonNews(
                     id = filename,
-                    album = category,
-                    source = file.absolutePath,
+                    category = category,
+                    filepath = file.absolutePath,
                     title = response.news[i].title
                 )
             )
@@ -155,18 +153,14 @@ class LibraryCreator(private val context: Context) : UtteranceProgressListener()
 
     private fun allLoaded(): Boolean {
         fileNames.forEach { name ->
-            Log.d(SERVICE_DEBUG, "$name has value: ${utteranceMap[name]}")
             if (!utteranceMap[name]!!) {
-                Log.d(SERVICE_DEBUG, "allLoaded returning false -> $name")
                 return false
             }
         }
-        Log.d(SERVICE_DEBUG, "allLoaded returning true")
         return true
     }
 
     override fun onDone(utteranceId: String?) {
-        Log.d(SERVICE_DEBUG, "TextToSpeech.onDone for: $utteranceId")
         if (utteranceId == null)
             return
         else
@@ -179,11 +173,9 @@ class LibraryCreator(private val context: Context) : UtteranceProgressListener()
     }
 
     override fun onError(utteranceId: String?) {
-        Log.d(SERVICE_DEBUG, "TextToSpeech.onError for: $utteranceId")
     }
 
     override fun onStart(utteranceId: String?) {
-        Log.d(SERVICE_DEBUG, "TextToSpeech.onStart for: $utteranceId")
     }
 
     override fun onInit(status: Int) {

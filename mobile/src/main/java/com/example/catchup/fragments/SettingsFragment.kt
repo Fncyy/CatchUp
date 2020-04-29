@@ -1,5 +1,6 @@
 package com.example.catchup.fragments
 
+import android.content.Context
 import android.os.Bundle
 import androidx.preference.Preference
 import androidx.preference.PreferenceCategory
@@ -12,6 +13,16 @@ import com.example.catchup.shared.library.LibraryCreator
 class SettingsFragment : PreferenceFragmentCompat(), Preference.OnPreferenceChangeListener {
     override fun onCreatePreferences(savedInstanceState: Bundle?, rootKey: String?) {
         val context = preferenceManager.context
+        val preferences = context.getSharedPreferences(getString(R.string.settings_file_key), Context.MODE_PRIVATE)
+        val news = preferences.getInt(getString(R.string.KEY_NEWS), 0)
+        val categories = preferences.getInt(getString(R.string.KEY_CATEGORIES), 0)
+        if (news == 0 || categories == 0) {
+            with (preferences.edit()) {
+                putInt(getString(R.string.KEY_NEWS), LibraryCreator.SAVED_NEWS_COUNT)
+                putInt(getString(R.string.KEY_CATEGORIES), CategoryAdapter.MAX_SELECTED_COUNT)
+                commit()
+            }
+        }
         val screen = preferenceManager.createPreferenceScreen(context)
 
         val categoriesPreference = SeekBarPreference(context)
@@ -21,6 +32,7 @@ class SettingsFragment : PreferenceFragmentCompat(), Preference.OnPreferenceChan
         categoriesPreference.max = 8
         categoriesPreference.onPreferenceChangeListener = this
         categoriesPreference.showSeekBarValue = true
+        categoriesPreference.value
 
         val newsPreference = SeekBarPreference(context)
         newsPreference.key = getString(R.string.KEY_NEWS)
