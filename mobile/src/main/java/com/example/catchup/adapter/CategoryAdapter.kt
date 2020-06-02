@@ -66,30 +66,6 @@ class CategoryAdapter(private val context: Context) :
         selectedCount = getSelectedCount()
     }
 
-    private fun getSelectedCount(): Int {
-        var count = 0
-        categories.forEach { category ->
-            if (category.selected) count++
-        }
-        return count
-    }
-
-    private fun getSelectedItemsForStorage(): String {
-        var str = ""
-        var first = true
-        categories.forEach {
-            if (it.selected) {
-                if (first) {
-                    str += it.name
-                    first = false
-                } else {
-                    str += ", ${it.name}"
-                }
-            }
-        }
-        return str
-    }
-
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
         val view = LayoutInflater.from(parent.context)
             .inflate(R.layout.main_row_item, parent, false)
@@ -126,6 +102,30 @@ class CategoryAdapter(private val context: Context) :
                 out.close()
             }
         }
+    }
+
+    private fun getSelectedCount(): Int {
+        var count = 0
+        categories.forEach { category ->
+            if (category.selected) count++
+        }
+        return count
+    }
+
+    private fun getSelectedItemsForStorage(): String {
+        var str = ""
+        var first = true
+        categories.forEach {
+            if (it.selected) {
+                if (first) {
+                    str += it.name
+                    first = false
+                } else {
+                    str += ", ${it.name}"
+                }
+            }
+        }
+        return str
     }
 
     class ViewHolder(view: View) : RecyclerView.ViewHolder(view) {

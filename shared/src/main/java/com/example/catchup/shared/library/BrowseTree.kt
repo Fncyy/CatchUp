@@ -1,19 +1,18 @@
 package com.example.catchup.shared.library
 
-import android.content.Context
-import android.provider.MediaStore
 import android.support.v4.media.MediaBrowserCompat
 import android.support.v4.media.MediaMetadataCompat
-import android.util.Log
-import com.example.catchup.shared.BROWSE_DEBUG
 import com.example.catchup.shared.extensions.album
 import com.example.catchup.shared.extensions.flag
 import com.example.catchup.shared.extensions.id
 import com.example.catchup.shared.extensions.title
 
-class BrowseTree(context: Context) {
+
+/**
+ * Class that creates the necessary background data for the class MediaBrowserServiceCompat
+ */
+class BrowseTree(private val libraryCreator: LibraryCreator) {
     private val mediaIdToChildren = mutableMapOf<String, MutableList<MediaMetadataCompat>>()
-    val libraryCreator = LibraryCreator(context)
     val libraryMap = mutableMapOf<String, MediaMetadataCompat>()
 
     init {
@@ -32,6 +31,9 @@ class BrowseTree(context: Context) {
             }
     }
 
+    /**
+     * Adds another children to the root in [mediaIdToChildren] based on the album attribute of [mediaItem]
+     */
     private fun buildAlbumRoot(mediaItem: MediaMetadataCompat): MutableList<MediaMetadataCompat> {
         val albumMetadata = MediaMetadataCompat.Builder().apply {
             id = mediaItem.album.toString()

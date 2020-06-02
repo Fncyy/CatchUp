@@ -16,11 +16,6 @@ interface CurrentsAPI {
         const val API_KEY = "mBqiPHzKXZKRq64JiB3HeMXF3SvRXX7RXkkNX-8mYl_M9Ugi"
     }
 
-    @GET(LATEST_NEWS_URL)
-    fun getLatestNews(
-        @Query("apiKey") apiKey: String = API_KEY
-    ): Call<NewsResponse>
-
     @GET(CATEGORY_URL)
     fun getAvailableCategories(): Call<CategoryResponse>
 
